@@ -40,3 +40,4 @@ jobs:
         with:
           commit_message: Auto-update TVI playlist
           file_pattern: 'portugal_tvi.m3u'
+          add_options: '--all'
