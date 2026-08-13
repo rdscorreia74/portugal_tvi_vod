@@ -2,16 +2,11 @@ name: Update Portugal TVI Playlist
 
 on:
   schedule:
-    # Runs twice daily at 00:00 and 12:00 UTC
     - cron: '0 0,12 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
-
-# Silences Node runtime warnings across all runner steps
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
 
 jobs:
   update-playlist:
@@ -32,7 +27,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install requests beautifulsoup4
+          pip install playwright beautifulsoup4
+          playwright install --with-deps chromium
 
       - name: Run playlist generator
         run: python update_playlist.py
