@@ -18,36 +18,61 @@ SHOWS_TO_SCRAPE = [
     }
 ]
 
+def extract_token_from_text(text):
+    """Try multiple regex patterns to find wmsAuthSign in HTML, JS, or JSON."""
+    patterns = [
+        r'wmsAuthSign=([^\s"\'&]+)',           # URL parameter format
+        r'["\']wmsAuthSign["\']\s*:\s*["\']([^"\'\s]+)["\']', # JSON format
+        r'wmsAuthSign["\']?\s*=\s*["\']([^"\'\s]+)["\']'      # JS variable format
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, text)
+        if match:
+            return match.group(1)
+    return None
+
 def fetch_global_token():
     headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
     
     for show in SHOWS_TO_SCRAPE:
-        print(f"Checking show page for episodes: {show['name']}...")
+        print(f"Searching show page: {show['name']}...")
         try:
             res = requests.get(show["url"], headers=headers, timeout=10)
             if res.status_code == 200:
+                # 1. First check if token exists directly on the show page text
+                token = extract_token_from_text(res.text)
+                if token:
+                    print("Successfully extracted token from show page!")
+                    return token
+                
                 soup = BeautifulSoup(res.text, "html.parser")
-                # Find the first episode link
                 ep_link = soup.find("a", href=re.compile(r'/video/'))
                 
                 if ep_link:
                     ep_url = ep_link['href']
                     if not ep_url.startswith("http"):
                         ep_url = BASE_URL + ep_url
-                        
-                    print(f"Fetching token from episode page: {ep_url}...")
-                    ep_res = requests.get(ep_url, headers=headers, timeout=10)
                     
-                    if ep_res.status_code == 200:
-                        # Extract wmsAuthSign from the episode player HTML/JS
-                        match = re.search(r'wmsAuthSign=([^\s"\'&]+)', ep_res.text)
-                        if match:
-                            print("Successfully extracted token!")
-                            return match.group(1)
+                    video_id_match = re.search(r'video/([a-f0-9]+)', ep_url)
+                    urls_to_check = [ep_url]
+                    
+                    # Also try the TVI Embed page if video ID is found
+                    if video_id_match:
+                        urls_to_check.append(f"{BASE_URL}/embed/video/{video_id_match.group(1)}")
+
+                    for target_url in urls_to_check:
+                        print(f"Fetching from target page: {target_url}...")
+                        ep_res = requests.get(target_url, headers=headers, timeout=10)
+                        if ep_res.status_code == 200:
+                            token = extract_token_from_text(ep_res.text)
+                            if token:
+                                print("Successfully extracted token!")
+                                return token
+
         except Exception as e:
             print(f"Error checking {show['name']}: {e}")
             
-    print("Error: Could not extract wmsAuthSign token from any episode page.")
+    print("Error: Could not extract wmsAuthSign token from any page.")
     return None
 
 def build_m3u():
