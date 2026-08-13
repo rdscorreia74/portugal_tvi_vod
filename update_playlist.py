@@ -1,107 +1,77 @@
-import re
-import json
 import requests
-from bs4 import BeautifulSoup
 
 BASE_URL = "https://tviplayer.iol.pt"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
+# Show IDs extracted from TVI Player API
 SHOWS_TO_SCRAPE = [
     {
         "name": "Dois às 10",
         "category": "Entretenimento",
-        "url": "https://tviplayer.iol.pt/programa/dois-as-10/5fdcb61a0cf2432ec4cb03e2"
+        "id": "5fdcb61a0cf2432ec4cb03e2"
     },
     {
         "name": "Goucha",
         "category": "Entretenimento",
-        "url": "https://tviplayer.iol.pt/programa/goucha/5fe350a40cf2febe232a5ff5"
+        "id": "5fe350a40cf2febe232a5ff5"
     }
 ]
 
 def fetch_global_token():
-    headers = {
-        "User-Agent": USER_AGENT,
-        "Referer": BASE_URL,
-        "Accept": "application/json, text/plain, */*"
-    }
-    
-    # Method 1: Fetch via TVI's Matrix token API endpoint
-    print("Trying TVI Auth API...")
+    """Try to grab wmsAuthSign from TVI's public token API."""
+    headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
     try:
-        api_res = requests.get("https://services.iol.pt/matrix/init/tviplayer", headers=headers, timeout=10)
-        if api_res.status_code == 200:
-            data = api_res.json()
-            token = data.get("wmsAuthSign") or data.get("token")
-            if token:
-                print("Successfully obtained token from API!")
-                return token
+        res = requests.get("https://services.iol.pt/matrix/init/tviplayer", headers=headers, timeout=10)
+        if res.status_code == 200:
+            data = res.json()
+            return data.get("wmsAuthSign") or data.get("token") or ""
     except Exception as e:
-        print(f"API attempt failed: {e}")
+        print(f"Token fetch error: {e}")
+    return ""
 
-    # Method 2: Extract from page state (JSON blocks in HTML)
-    for show in SHOWS_TO_SCRAPE:
-        print(f"Checking JSON state for: {show['name']}...")
-        try:
-            res = requests.get(show["url"], headers={"User-Agent": USER_AGENT, "Referer": BASE_URL}, timeout=10)
-            if res.status_code == 200:
-                # Look for __NEXT_DATA__ or embedded JSON
-                soup = BeautifulSoup(res.text, "html.parser")
-                script = soup.find("script", id="__NEXT_DATA__")
-                if script and script.string:
-                    json_data = json.loads(script.string)
-                    # Deep search for wmsAuthSign string in JSON
-                    json_str = json.dumps(json_data)
-                    match = re.search(r'wmsAuthSign["\']?\s*:\s*["\']([^"\'\s]+)["\']', json_str)
-                    if match:
-                        print("Successfully extracted token from __NEXT_DATA__!")
-                        return match.group(1)
-
-                # Direct regex search on the raw page
-                match = re.search(r'wmsAuthSign=([^\s"\'&]+)', res.text)
-                if match:
-                    print("Successfully extracted token via regex!")
-                    return match.group(1)
-        except Exception as e:
-            print(f"Error checking {show['name']}: {e}")
-
-    print("Error: Could not extract wmsAuthSign token from any source.")
-    return None
+def get_show_episodes(show_id):
+    """Fetch episodes using TVI's API endpoint."""
+    headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
+    # TVI API endpoint for program videos
+    api_url = f"https://tviplayer.iol.pt/api/v1/program/{show_id}/videos/1/10"
+    
+    try:
+        res = requests.get(api_url, headers=headers, timeout=10)
+        if res.status_code == 200:
+            data = res.json()
+            # Extract video items from API response
+            if isinstance(data, dict):
+                return data.get("videos", data.get("data", []))
+            elif isinstance(data, list):
+                return data
+    except Exception as e:
+        print(f"Error fetching API for {show_id}: {e}")
+    return []
 
 def build_m3u():
     token = fetch_global_token()
-    
-    # Fallback to empty token string if unavailable so playlist generates anyway
-    if not token:
-        print("Warning: Token missing, proceeding without token query param.")
-        token = ""
+    if token:
+        print("Successfully obtained wmsAuthSign token!")
+    else:
+        print("Proceeding without auth token (will build standard stream URLs).")
 
-    m3u_lines = ["#EXTM3U\n"]
-    headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
+    m3u_lines = ["#EXTM3U"]
+    auth_suffix = f"?wmsAuthSign={token}" if token else ""
 
     for show in SHOWS_TO_SCRAPE:
-        print(f"Scraping episodes for: {show['name']}...")
-        res = requests.get(show["url"], headers=headers)
-        if res.status_code != 200:
-            continue
-            
-        soup = BeautifulSoup(res.text, "html.parser")
+        print(f"Fetching episodes for: {show['name']}...")
+        episodes = get_show_episodes(show["id"])
         
-        # Show poster / logo
-        logo_tag = soup.find("meta", property="og:image")
-        show_logo = logo_tag["content"] if logo_tag else ""
+        print(f"Found {len(episodes)} episodes for {show['name']}")
 
-        # Find 24-char hex IDs
-        video_ids = list(set(re.findall(r'[a-f0-9]{24}', res.text)))
-        show_id_match = re.search(r'[a-f0-9]{24}', show["url"])
-        if show_id_match:
-            video_ids = [v for v in video_ids if v != show_id_match.group(0)]
+        for idx, ep in enumerate(episodes):
+            video_id = ep.get("id") or ep.get("videoId")
+            if not video_id:
+                continue
 
-        print(f"Found {len(video_ids)} episode video IDs for {show['name']}")
-
-        for idx, video_id in enumerate(video_ids[:10]):
-            ep_title = f"Episódio {idx + 1}"
-            auth_suffix = f"?wmsAuthSign={token}" if token else ""
+            ep_title = ep.get("title") or f"Episódio {idx + 1}"
+            show_logo = ep.get("cover") or ep.get("image") or ""
+            
             stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{video_id}-L.smil/playlist.m3u8{auth_suffix}"
             
             m3u_lines.append(
@@ -113,10 +83,12 @@ def build_m3u():
             m3u_lines.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
             m3u_lines.append(f"#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent={USER_AGENT}&Referer={BASE_URL}/&Origin={BASE_URL}")
             m3u_lines.append(f"#KODIPROP:inputstream.adaptive.stream_headers=User-Agent={USER_AGENT}&Referer={BASE_URL}/&Origin={BASE_URL}")
-            m3u_lines.append(f"{stream_url}\n")
+            m3u_lines.append(stream_url)
 
+    # Write out the file line by line
+    content = "\n".join(m3u_lines) + "\n"
     with open("portugal_tvi.m3u", "w", encoding="utf-8") as f:
-        f.write("\n".join(m3u_lines))
+        f.write(content)
 
     print("Saved playlist as portugal_tvi.m3u successfully!")
 
