@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+# Silences Node runtime warnings across all runner steps
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+
 jobs:
   update-playlist:
     runs-on: ubuntu-latest
