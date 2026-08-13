@@ -1,16 +1,17 @@
+import json
 import re
-from playwright.sync_api import sync_playwright
+import requests
 from bs4 import BeautifulSoup
 
 BASE_URL = "https://tviplayer.iol.pt"
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-# Add any TVI Player shows you want here
 SHOWS_TO_SCRAPE = [
     {
         "name": "Dois às 10",
         "category": "Entretenimento",
         "url": "https://tviplayer.iol.pt/programa/dois-as-10",
-        "max_episodes": 30  # Adjust maximum episode count per show
+        "max_episodes": 30
     },
     {
         "name": "Goucha",
@@ -20,83 +21,140 @@ SHOWS_TO_SCRAPE = [
     }
 ]
 
+def fetch_wms_token():
+    """Fetches a valid wmsAuthSign token directly from TVI's auth service."""
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Referer": "https://tviplayer.iol.pt/",
+        "Origin": "https://tviplayer.iol.pt"
+    }
+    endpoints = [
+        "https://services.iol.pt/matrix/init/tviplayer",
+        "https://tviplayer.iol.pt/api/v1/init"
+    ]
+    
+    for ep in endpoints:
+        try:
+            res = requests.get(ep, headers=headers, timeout=10)
+            if res.status_code == 200:
+                data = res.json()
+                token = data.get("wmsAuthSign") or data.get("token")
+                if token:
+                    print(f"Obtained wmsAuthSign token from API: {token[:15]}...")
+                    return token
+        except Exception as e:
+            print(f"Error checking token endpoint {ep}: {e}")
+
+    return ""
+
 def build_m3u():
+    token = fetch_wms_token()
+    token_param = f"?wmsAuthSign={token}" if token else ""
+    
     m3u_lines = ["#EXTM3U"]
-    captured_auth_token = [""]  # Shared list to store intercepted wmsAuthSign
+    headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1280, "height": 720}
-        )
-        page = context.new_page()
+    for show in SHOWS_TO_SCRAPE:
+        print(f"Scraping metadata for: {show['name']}...")
+        try:
+            res = requests.get(show["url"], headers=headers, timeout=15)
+            if res.status_code != 200:
+                print(f"Failed to load show page for {show['name']} (HTTP {res.status_code})")
+                continue
 
-        # Intercept background network responses to capture wmsAuthSign token
-        def handle_response(response):
-            try:
-                url = response.url
-                if "wmsAuthSign=" in url and not captured_auth_token[0]:
-                    match = re.search(r'wmsAuthSign=([^\s"\'&]+)', url)
-                    if match:
-                        captured_auth_token[0] = match.group(1)
-                        print(f"Intercepted wmsAuthSign token: {captured_auth_token[0][:15]}...")
-            except Exception:
-                pass
+            soup = BeautifulSoup(res.text, "html.parser")
+            
+            # Default show logo fallback from meta og:image
+            meta_logo = soup.find("meta", property="og:image")
+            show_logo = meta_logo["content"] if meta_logo and meta_logo.has_attr("content") else ""
 
-        page.on("response", handle_response)
+            episodes_data = []
 
-        for show in SHOWS_TO_SCRAPE:
-            print(f"Loading page for show: {show['name']}...")
-            try:
-                page.goto(show["url"], wait_until="domcontentloaded", timeout=30000)
-                page.wait_for_timeout(4000)  # Wait for JS player execution
+            # 1. Try extracting structured JSON from __NEXT_DATA__
+            next_data_script = soup.find("script", id="__NEXT_DATA__")
+            if next_data_script and next_data_script.string:
+                try:
+                    json_data = json.loads(next_data_script.string)
+                    # Traverse JSON to find episode arrays
+                    props = json_data.get("props", {}).get("pageProps", {})
+                    episodes_list = props.get("videos", []) or props.get("episodes", []) or props.get("initialData", {}).get("videos", [])
+                    
+                    for ep in episodes_list:
+                        vid_id = ep.get("id") or ep.get("videoId") or ep.get("_id")
+                        title = ep.get("title") or ep.get("name", "")
+                        summary = ep.get("description") or ep.get("synopsis") or ep.get("summary", "")
+                        cover = ep.get("cover") or ep.get("image") or ep.get("thumbnailUrl", show_logo)
+                        
+                        if vid_id:
+                            episodes_data.append({
+                                "id": vid_id,
+                                "title": title,
+                                "summary": summary,
+                                "logo": cover
+                            })
+                except Exception as json_err:
+                    print(f"Error parsing JSON state: {json_err}")
+
+            # 2. Fallback: Parse video cards from HTML DOM directly
+            if not episodes_data:
+                video_cards = soup.find_all(["article", "div", "a"], href=re.compile(r'/video/|/episodio/'))
+                for card in video_cards:
+                    href = card.get("href") or (card.find("a") and card.find("a").get("href"))
+                    if not href:
+                        continue
+
+                    vid_match = re.search(r'([a-f0-9]{24})', href)
+                    if not vid_match:
+                        continue
+
+                    vid_id = vid_match.group(1)
+                    
+                    # Extract title & summary text
+                    title_elem = card.find(["h2", "h3", "h4", "span", "p"])
+                    title = title_elem.text.strip() if title_elem else ""
+
+                    img_elem = card.find("img")
+                    img_url = img_elem.get("src") or img_elem.get("data-src") if img_elem else show_logo
+
+                    if not any(e["id"] == vid_id for e in episodes_data):
+                        episodes_data.append({
+                            "id": vid_id,
+                            "title": title,
+                            "summary": "",
+                            "logo": img_url or show_logo
+                        })
+
+            limit = show.get("max_episodes", 30)
+            episodes_data = episodes_data[:limit]
+            print(f"[{show['name']}] Found {len(episodes_data)} detailed episodes.")
+
+            for idx, ep in enumerate(episodes_data):
+                video_id = ep["id"]
+                ep_title = ep["title"] if ep["title"] else f"Episódio {idx + 1}"
+                ep_logo = ep["logo"] if ep["logo"] else show_logo
+                ep_summary = ep["summary"].replace("\n", " ").strip() if ep["summary"] else ""
+
+                stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{video_id}-L.smil/playlist.m3u8{token_param}"
+
+                # Construct M3U entry with metadata tags
+                m3u_lines.append(
+                    f'#EXTINF:-1 tvg-logo="{ep_logo}" '
+                    f'group-title="{show["category"]} - {show["name"]}" '
+                    f'tvg-name="{show["name"]} - {ep_title}" '
+                    f'group-logo="{show_logo}",{show["name"]} - {ep_title}'
+                )
+                if ep_summary:
+                    m3u_lines.append(f'#EXTVLCOPT:description={ep_summary}')
                 
-                html_content = page.content()
-                soup = BeautifulSoup(html_content, "html.parser")
+                # Kodi InputStream Adaptive Headers
+                m3u_lines.append("#KODIPROP:inputstream=inputstream.adaptive")
+                m3u_lines.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
+                m3u_lines.append(f"#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent={USER_AGENT}&Referer={BASE_URL}/&Origin={BASE_URL}")
+                m3u_lines.append(f"#KODIPROP:inputstream.adaptive.stream_headers=User-Agent={USER_AGENT}&Referer={BASE_URL}/&Origin={BASE_URL}")
+                m3u_lines.append(stream_url)
 
-                # Extract cover image
-                logo_tag = soup.find("meta", property="og:image")
-                show_logo = logo_tag["content"] if logo_tag and logo_tag.has_attr("content") else ""
-
-                # Extract video IDs (24 hex characters)
-                raw_ids = re.findall(r'([a-f0-9]{24})', html_content)
-                
-                # Deduplicate video IDs
-                video_ids = []
-                for vid in raw_ids:
-                    if vid not in video_ids:
-                        video_ids.append(vid)
-
-                limit = show.get("max_episodes", 20)
-                print(f"[{show['name']}] Processing top {min(len(video_ids), limit)} out of {len(video_ids)} extracted IDs.")
-
-                token_suffix = f"?wmsAuthSign={captured_auth_token[0]}" if captured_auth_token[0] else ""
-
-                count = 0
-                for vid in video_ids:
-                    count += 1
-                    if count > limit:
-                        break
-
-                    ep_title = f"Episódio {count}"
-                    stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{vid}-L.smil/playlist.m3u8{token_suffix}"
-
-                    m3u_lines.append(
-                        f'#EXTINF:-1 tvg-logo="{show_logo}" '
-                        f'group-title="{show["category"]} - {show["name"]}" '
-                        f'media="true",{show["name"]} - {ep_title}'
-                    )
-                    m3u_lines.append("#KODIPROP:inputstream=inputstream.adaptive")
-                    m3u_lines.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
-                    m3u_lines.append(f"#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer={BASE_URL}/&Origin={BASE_URL}")
-                    m3u_lines.append(f"#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer={BASE_URL}/&Origin={BASE_URL}")
-                    m3u_lines.append(stream_url)
-
-            except Exception as e:
-                print(f"Error rendering {show['name']}: {e}")
-
-        browser.close()
+        except Exception as e:
+            print(f"Error scraping {show['name']}: {e}")
 
     content = "\n".join(m3u_lines) + "\n"
     with open("portugal_tvi.m3u", "w", encoding="utf-8") as f:
