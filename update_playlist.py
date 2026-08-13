@@ -18,12 +18,12 @@ SHOWS_TO_SCRAPE = [
     }
 ]
 
-def extract_token_from_text(text):
-    """Try multiple regex patterns to find wmsAuthSign in HTML, JS, or JSON."""
+def extract_token(text):
+    """Search for wmsAuthSign across URL parameters, JS variables, and JSON strings."""
     patterns = [
-        r'wmsAuthSign=([^\s"\'&]+)',           # URL parameter format
-        r'["\']wmsAuthSign["\']\s*:\s*["\']([^"\'\s]+)["\']', # JSON format
-        r'wmsAuthSign["\']?\s*=\s*["\']([^"\'\s]+)["\']'      # JS variable format
+        r'wmsAuthSign=([^\s"\'&]+)',
+        r'["\']wmsAuthSign["\']\s*:\s*["\']([^"\'\s]+)["\']',
+        r'wmsAuthSign["\']?\s*=\s*["\']([^"\'\s]+)["\']'
     ]
     for pattern in patterns:
         match = re.search(pattern, text)
@@ -34,45 +34,32 @@ def extract_token_from_text(text):
 def fetch_global_token():
     headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
     
+    # 1. Primary Method: TVI Direto player page (guaranteed to contain active wmsAuthSign token)
+    print("Fetching global token from TVI Direto...")
+    try:
+        res = requests.get(f"{BASE_URL}/direto", headers=headers, timeout=10)
+        if res.status_code == 200:
+            token = extract_token(res.text)
+            if token:
+                print("Successfully extracted token from Direto!")
+                return token
+    except Exception as e:
+        print(f"Error checking Direto page: {e}")
+
+    # 2. Fallback: Search show pages directly
     for show in SHOWS_TO_SCRAPE:
-        print(f"Searching show page: {show['name']}...")
+        print(f"Fallback searching: {show['name']}...")
         try:
             res = requests.get(show["url"], headers=headers, timeout=10)
             if res.status_code == 200:
-                # 1. First check if token exists directly on the show page text
-                token = extract_token_from_text(res.text)
+                token = extract_token(res.text)
                 if token:
-                    print("Successfully extracted token from show page!")
+                    print("Successfully extracted token!")
                     return token
-                
-                soup = BeautifulSoup(res.text, "html.parser")
-                ep_link = soup.find("a", href=re.compile(r'/video/'))
-                
-                if ep_link:
-                    ep_url = ep_link['href']
-                    if not ep_url.startswith("http"):
-                        ep_url = BASE_URL + ep_url
-                    
-                    video_id_match = re.search(r'video/([a-f0-9]+)', ep_url)
-                    urls_to_check = [ep_url]
-                    
-                    # Also try the TVI Embed page if video ID is found
-                    if video_id_match:
-                        urls_to_check.append(f"{BASE_URL}/embed/video/{video_id_match.group(1)}")
-
-                    for target_url in urls_to_check:
-                        print(f"Fetching from target page: {target_url}...")
-                        ep_res = requests.get(target_url, headers=headers, timeout=10)
-                        if ep_res.status_code == 200:
-                            token = extract_token_from_text(ep_res.text)
-                            if token:
-                                print("Successfully extracted token!")
-                                return token
-
         except Exception as e:
             print(f"Error checking {show['name']}: {e}")
-            
-    print("Error: Could not extract wmsAuthSign token from any page.")
+
+    print("Error: Could not extract wmsAuthSign token from any source.")
     return None
 
 def build_m3u():
@@ -92,24 +79,25 @@ def build_m3u():
             
         soup = BeautifulSoup(res.text, "html.parser")
         
-        # Show poster / logo
+        # Extract show poster / logo
         logo_tag = soup.find("meta", property="og:image")
         show_logo = logo_tag["content"] if logo_tag else ""
 
-        # Extract all episode links
-        episodes = soup.find_all("a", href=re.compile(r'/video/'))
+        # Extract 24-character hexadecimal video IDs from any links or attributes
+        video_ids = list(set(re.findall(r'[a-f0-9]{24}', res.text)))
         
-        for idx, ep in enumerate(episodes):
-            ep_title = ep.text.strip() or f"Episódio {idx + 1}"
-            
-            video_match = re.search(r'video/([a-f0-9]+)', ep['href'])
-            if not video_match:
-                continue
-                
-            video_id = video_match.group(1)
+        # Filter out the show ID itself if present in URL
+        show_id_match = re.search(r'[a-f0-9]{24}', show["url"])
+        if show_id_match:
+            show_id = show_id_match.group(0)
+            video_ids = [v for v in video_ids if v != show_id]
+
+        print(f"Found {len(video_ids)} episode video IDs for {show['name']}")
+
+        for idx, video_id in enumerate(video_ids[:10]):  # Limit to 10 latest episodes per show
+            ep_title = f"Episódio {idx + 1}"
             stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{video_id}-L.smil/playlist.m3u8?wmsAuthSign={token}"
             
-            # media="true" forces Kodi PVR to list this item under Recordings / VOD
             m3u_lines.append(
                 f'#EXTINF:-1 tvg-logo="{show_logo}" '
                 f'group-title="{show["category"]} - {show["name"]}" '
