@@ -1,1 +1,121 @@
 #EXTM3U
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 1
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:54e1ff78c67c58505a168f4d-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 2
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:b6b2d95d2daeace7ee6b53e0-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 3
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a3ec1cfd34edcee7c65bf70-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 4
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:5eb3f47e0cf2a58834209072-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 5
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a6a222ad34e511da0b30769-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 6
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a05d0fad34e28842c84082c-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 7
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a463e59d34e28842c85d78c-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 8
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a466f34d34edcee7c65fa54-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 9
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a390e82d34e28842c857146-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" media="true",Dois às 10 - Episódio 10
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6978e834d34e0ec52ec2c9d2-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 1
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:54e1ff78c67c58505a168f4d-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 2
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:b6b2d95d2daeace7ee6b53e0-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 3
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a3ec1cfd34edcee7c65bf70-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 4
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:5eb3f47e0cf2a58834209072-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 5
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a6a222ad34e511da0b30769-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 6
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a05d0fad34e28842c84082c-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 7
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a463e59d34e28842c85d78c-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 8
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a466f34d34edcee7c65fa54-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 9
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6a390e82d34e28842c857146-L.smil/playlist.m3u8
+#EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" media="true",Goucha - Episódio 10
+#KODIPROP:inputstream=inputstream.adaptive
+#KODIPROP:inputstream.adaptive.manifest_type=hls
+#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
+https://streaming-vod2.iol.pt/vod/smil:6978e834d34e0ec52ec2c9d2-L.smil/playlist.m3u8
