@@ -9,24 +9,28 @@ SHOWS_TO_SCRAPE = [
     {
         "name": "Dois às 10",
         "category": "Entretenimento",
-        "rss": "https://tviplayer.iol.pt/rss/programa/dois-as-10/5fdcb61a0cf2432ec4cb03e2"
+        "url": "https://tviplayer.iol.pt/programa/dois-as-10/5fdcb61a0cf2432ec4cb03e2"
     },
     {
         "name": "Goucha",
         "category": "Entretenimento",
-        "rss": "https://tviplayer.iol.pt/rss/programa/goucha/5fe350a40cf2febe232a5ff5"
+        "url": "https://tviplayer.iol.pt/programa/goucha/5fe350a40cf2febe232a5ff5"
     }
 ]
 
 def fetch_global_token():
+    """Attempts to grab wmsAuthSign token from TVI's public Matrix API."""
     headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
     try:
         res = requests.get("https://services.iol.pt/matrix/init/tviplayer", headers=headers, timeout=10)
         if res.status_code == 200:
             data = res.json()
-            return data.get("wmsAuthSign") or data.get("token") or ""
+            token = data.get("wmsAuthSign") or data.get("token") or ""
+            if token:
+                print("Token successfully retrieved from API!")
+                return token
     except Exception as e:
-        print(f"Token error: {e}")
+        print(f"Token retrieval note: {e}")
     return ""
 
 def build_m3u():
@@ -36,42 +40,67 @@ def build_m3u():
     auth_suffix = f"?wmsAuthSign={token}" if token else ""
 
     for show in SHOWS_TO_SCRAPE:
-        print(f"Fetching RSS feed for: {show['name']}...")
+        print(f"Fetching page for show: {show['name']}...")
         try:
-            res = requests.get(show["rss"], headers=headers, timeout=10)
+            res = requests.get(show["url"], headers=headers, timeout=10)
+            print(f"[{show['name']}] HTTP Status: {res.status_code}, Page Size: {len(res.text)} bytes")
+
             if res.status_code != 200:
-                print(f"Failed to load RSS for {show['name']} (HTTP {res.status_code})")
                 continue
 
-            # Parse XML feed
-            soup = BeautifulSoup(res.text, "xml")
-            items = soup.find_all("item")
-            print(f"Found {len(items)} episodes in RSS for {show['name']}")
+            soup = BeautifulSoup(res.text, "html.parser")
 
-            for idx, item in enumerate(items[:10]):  # Grab 10 latest episodes
-                title_tag = item.find("title")
-                link_tag = item.find("link")
-                
-                title = title_tag.text.strip() if title_tag else f"Episódio {idx + 1}"
-                link = link_tag.text.strip() if link_tag else ""
+            # Extract logo/cover image from meta tags
+            logo_tag = soup.find("meta", property="og:image")
+            show_logo = logo_tag["content"] if logo_tag and logo_tag.has_attr("content") else ""
 
-                # Extract 24-character hexadecimal video ID from link URL
-                video_match = re.search(r'[a-f0-9]{24}', link)
+            # Search for any links containing /video/ in href
+            video_links = soup.find_all("a", href=re.compile(r'/video/'))
+            
+            # Fallback: search raw HTML for video href patterns if BeautifulSoup tags missed any
+            if not video_links:
+                raw_hrefs = re.findall(r'href=["\']([^"\']*?/video/[^"\']+)["\']', res.text)
+                episodes_found = list(set(raw_hrefs))
+            else:
+                episodes_found = []
+                for a in video_links:
+                    href = a.get("href", "")
+                    title = a.text.strip()
+                    if href and href not in [e[0] for e in episodes_found]:
+                        episodes_found.append((href, title))
+
+            print(f"[{show['name']}] Found {len(episodes_found)} raw video links.")
+
+            added_ids = set()
+            count = 0
+
+            for ep in episodes_found:
+                href = ep[0] if isinstance(ep, tuple) else ep
+                title = ep[1] if isinstance(ep, tuple) and ep[1] else ""
+
+                # Extract 24-char hex ID for the video stream
+                video_match = re.search(r'video/([a-f0-9]{24})', href)
                 if not video_match:
+                    video_match = re.search(r'([a-f0-9]{24})', href)
+                    if not video_match or video_match.group(1) in show["url"]:
+                        continue
+
+                video_id = video_match.group(1)
+                if video_id in added_ids:
                     continue
 
-                video_id = video_match.group(0)
-                
-                # Check for enclosure/thumbnail image
-                media_thumb = item.find("media:thumbnail") or item.find("enclosure")
-                show_logo = media_thumb["url"] if media_thumb and media_thumb.has_attr("url") else ""
+                added_ids.add(video_id)
+                count += 1
+                if count > 10:  # Limit to top 10 latest episodes
+                    break
 
+                ep_title = title if title else f"Episódio {count}"
                 stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{video_id}-L.smil/playlist.m3u8{auth_suffix}"
 
                 m3u_lines.append(
                     f'#EXTINF:-1 tvg-logo="{show_logo}" '
                     f'group-title="{show["category"]} - {show["name"]}" '
-                    f'media="true",{show["name"]} - {title}'
+                    f'media="true",{show["name"]} - {ep_title}'
                 )
                 m3u_lines.append("#KODIPROP:inputstream=inputstream.adaptive")
                 m3u_lines.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
@@ -80,7 +109,7 @@ def build_m3u():
                 m3u_lines.append(stream_url)
 
         except Exception as e:
-            print(f"Error reading RSS for {show['name']}: {e}")
+            print(f"Error scraping {show['name']}: {e}")
 
     content = "\n".join(m3u_lines) + "\n"
     with open("portugal_tvi.m3u", "w", encoding="utf-8") as f:
