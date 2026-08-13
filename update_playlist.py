@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 BASE_URL = "https://tviplayer.iol.pt"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-# List of TV Shows to scrape
 SHOWS_TO_SCRAPE = [
     {
         "name": "Dois às 10",
@@ -22,20 +21,33 @@ SHOWS_TO_SCRAPE = [
 def fetch_global_token():
     headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
     
-    # Try fetching a token from each show URL until one succeeds
     for show in SHOWS_TO_SCRAPE:
-        print(f"Fetching daily wmsAuthSign token from: {show['name']}...")
+        print(f"Checking show page for episodes: {show['name']}...")
         try:
-            response = requests.get(show["url"], headers=headers, timeout=10)
-            if response.status_code == 200:
-                match = re.search(r'wmsAuthSign=([^\s"\'&]+)', response.text)
-                if match:
-                    print("Successfully extracted token!")
-                    return match.group(1)
+            res = requests.get(show["url"], headers=headers, timeout=10)
+            if res.status_code == 200:
+                soup = BeautifulSoup(res.text, "html.parser")
+                # Find the first episode link
+                ep_link = soup.find("a", href=re.compile(r'/video/'))
+                
+                if ep_link:
+                    ep_url = ep_link['href']
+                    if not ep_url.startswith("http"):
+                        ep_url = BASE_URL + ep_url
+                        
+                    print(f"Fetching token from episode page: {ep_url}...")
+                    ep_res = requests.get(ep_url, headers=headers, timeout=10)
+                    
+                    if ep_res.status_code == 200:
+                        # Extract wmsAuthSign from the episode player HTML/JS
+                        match = re.search(r'wmsAuthSign=([^\s"\'&]+)', ep_res.text)
+                        if match:
+                            print("Successfully extracted token!")
+                            return match.group(1)
         except Exception as e:
             print(f"Error checking {show['name']}: {e}")
             
-    print("Error: Could not extract wmsAuthSign token from any show page.")
+    print("Error: Could not extract wmsAuthSign token from any episode page.")
     return None
 
 def build_m3u():
@@ -48,18 +60,18 @@ def build_m3u():
     headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
 
     for show in SHOWS_TO_SCRAPE:
-        print(f"Scraping show details for: {show['name']}...")
+        print(f"Scraping episodes for: {show['name']}...")
         res = requests.get(show["url"], headers=headers)
         if res.status_code != 200:
             continue
             
         soup = BeautifulSoup(res.text, "html.parser")
         
-        # Extract show poster / logo for Kodi
+        # Show poster / logo
         logo_tag = soup.find("meta", property="og:image")
         show_logo = logo_tag["content"] if logo_tag else ""
 
-        # Extract episode links
+        # Extract all episode links
         episodes = soup.find_all("a", href=re.compile(r'/video/'))
         
         for idx, ep in enumerate(episodes):
