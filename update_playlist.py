@@ -1,9 +1,8 @@
 import re
-import requests
+from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 BASE_URL = "https://tviplayer.iol.pt"
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
 SHOWS_TO_SCRAPE = [
     {
@@ -18,86 +17,71 @@ SHOWS_TO_SCRAPE = [
     }
 ]
 
-def fetch_global_token():
-    headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
-    try:
-        res = requests.get("https://services.iol.pt/matrix/init/tviplayer", headers=headers, timeout=10)
-        if res.status_code == 200:
-            data = res.json()
-            return data.get("wmsAuthSign") or data.get("token") or ""
-    except Exception as e:
-        print(f"Token note: {e}")
-    return ""
-
 def build_m3u():
-    token = fetch_global_token()
     m3u_lines = ["#EXTM3U"]
-    headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
-    auth_suffix = f"?wmsAuthSign={token}" if token else ""
 
-    for show in SHOWS_TO_SCRAPE:
-        print(f"Fetching page for show: {show['name']}...")
-        try:
-            res = requests.get(show["url"], headers=headers, timeout=10)
-            print(f"[{show['name']}] HTTP Status: {res.status_code}, Page Size: {len(res.text)} bytes")
+    with sync_playwright() as p:
+        # Launch headless Chromium with standard desktop viewport
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            viewport={"width": 1280, "height": 720}
+        )
+        page = context.new_page()
 
-            if res.status_code != 200:
-                continue
+        for show in SHOWS_TO_SCRAPE:
+            print(f"Loading page for show: {show['name']}...")
+            try:
+                # Go to show page and wait until DOM content is fully loaded
+                response = page.goto(show["url"], wait_until="domcontentloaded", timeout=30000)
+                status = response.status if response else "Unknown"
+                print(f"[{show['name']}] Response Status: {status}")
 
-            soup = BeautifulSoup(res.text, "html.parser")
+                # Wait 3 seconds for dynamic content to render
+                page.wait_for_timeout(3000)
+                html_content = page.content()
 
-            logo_tag = soup.find("meta", property="og:image")
-            show_logo = logo_tag["content"] if logo_tag and logo_tag.has_attr("content") else ""
+                soup = BeautifulSoup(html_content, "html.parser")
 
-            # Extract episode links from href attributes
-            video_links = soup.find_all("a", href=re.compile(r'/video/|/episodio/'))
-            
-            raw_hrefs = []
-            if video_links:
-                for a in video_links:
-                    href = a.get("href", "")
-                    title = a.text.strip()
-                    if href:
-                        raw_hrefs.append((href, title))
-            else:
-                matches = re.findall(r'href=["\']([^"\']+)["\']', res.text)
-                raw_hrefs = [(m, "") for m in matches if '/video/' in m or '/episodio/' in m]
+                # Extract cover image
+                logo_tag = soup.find("meta", property="og:image")
+                show_logo = logo_tag["content"] if logo_tag and logo_tag.has_attr("content") else ""
 
-            print(f"[{show['name']}] Found {len(raw_hrefs)} potential episode links.")
+                # Find episode video IDs from rendered HTML
+                matches = re.findall(r'([a-f0-9]{24})', html_content)
+                
+                # Deduplicate and clean IDs
+                video_ids = []
+                for vid in matches:
+                    if vid not in video_ids:
+                        video_ids.append(vid)
 
-            added_ids = set()
-            count = 0
+                print(f"[{show['name']}] Extracted {len(video_ids)} video IDs.")
 
-            for href, title in raw_hrefs:
-                video_match = re.search(r'([a-f0-9]{24})', href)
-                if not video_match:
-                    continue
+                count = 0
+                for vid in video_ids:
+                    count += 1
+                    if count > 10:
+                        break
 
-                video_id = video_match.group(1)
-                if video_id in added_ids:
-                    continue
+                    ep_title = f"Episódio {count}"
+                    stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{vid}-L.smil/playlist.m3u8"
 
-                added_ids.add(video_id)
-                count += 1
-                if count > 10:
-                    break
+                    m3u_lines.append(
+                        f'#EXTINF:-1 tvg-logo="{show_logo}" '
+                        f'group-title="{show["category"]} - {show["name"]}" '
+                        f'media="true",{show["name"]} - {ep_title}'
+                    )
+                    m3u_lines.append("#KODIPROP:inputstream=inputstream.adaptive")
+                    m3u_lines.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
+                    m3u_lines.append(f"#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer={BASE_URL}/&Origin={BASE_URL}")
+                    m3u_lines.append(f"#KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer={BASE_URL}/&Origin={BASE_URL}")
+                    m3u_lines.append(stream_url)
 
-                ep_title = title if title else f"Episódio {count}"
-                stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{video_id}-L.smil/playlist.m3u8{auth_suffix}"
+            except Exception as e:
+                print(f"Error rendering {show['name']}: {e}")
 
-                m3u_lines.append(
-                    f'#EXTINF:-1 tvg-logo="{show_logo}" '
-                    f'group-title="{show["category"]} - {show["name"]}" '
-                    f'media="true",{show["name"]} - {ep_title}'
-                )
-                m3u_lines.append("#KODIPROP:inputstream=inputstream.adaptive")
-                m3u_lines.append("#KODIPROP:inputstream.adaptive.manifest_type=hls")
-                m3u_lines.append(f"#KODIPROP:inputstream.adaptive.manifest_headers=User-Agent={USER_AGENT}&Referer={BASE_URL}/&Origin={BASE_URL}")
-                m3u_lines.append(f"#KODIPROP:inputstream.adaptive.stream_headers=User-Agent={USER_AGENT}&Referer={BASE_URL}/&Origin={BASE_URL}")
-                m3u_lines.append(stream_url)
-
-        except Exception as e:
-            print(f"Error scraping {show['name']}: {e}")
+        browser.close()
 
     content = "\n".join(m3u_lines) + "\n"
     with open("portugal_tvi.m3u", "w", encoding="utf-8") as f:
