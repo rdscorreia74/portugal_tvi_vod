@@ -4,24 +4,27 @@ from bs4 import BeautifulSoup
 
 BASE_URL = "https://tviplayer.iol.pt"
 
+# Add any TVI Player shows you want here
 SHOWS_TO_SCRAPE = [
     {
         "name": "Dois às 10",
         "category": "Entretenimento",
-        "url": "https://tviplayer.iol.pt/programa/dois-as-10"
+        "url": "https://tviplayer.iol.pt/programa/dois-as-10",
+        "max_episodes": 30  # Adjust maximum episode count per show
     },
     {
         "name": "Goucha",
         "category": "Entretenimento",
-        "url": "https://tviplayer.iol.pt/programa/goucha"
+        "url": "https://tviplayer.iol.pt/programa/goucha",
+        "max_episodes": 30
     }
 ]
 
 def build_m3u():
     m3u_lines = ["#EXTM3U"]
+    captured_auth_token = [""]  # Shared list to store intercepted wmsAuthSign
 
     with sync_playwright() as p:
-        # Launch headless Chromium with standard desktop viewport
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -29,43 +32,55 @@ def build_m3u():
         )
         page = context.new_page()
 
+        # Intercept background network responses to capture wmsAuthSign token
+        def handle_response(response):
+            try:
+                url = response.url
+                if "wmsAuthSign=" in url and not captured_auth_token[0]:
+                    match = re.search(r'wmsAuthSign=([^\s"\'&]+)', url)
+                    if match:
+                        captured_auth_token[0] = match.group(1)
+                        print(f"Intercepted wmsAuthSign token: {captured_auth_token[0][:15]}...")
+            except Exception:
+                pass
+
+        page.on("response", handle_response)
+
         for show in SHOWS_TO_SCRAPE:
             print(f"Loading page for show: {show['name']}...")
             try:
-                # Go to show page and wait until DOM content is fully loaded
-                response = page.goto(show["url"], wait_until="domcontentloaded", timeout=30000)
-                status = response.status if response else "Unknown"
-                print(f"[{show['name']}] Response Status: {status}")
-
-                # Wait 3 seconds for dynamic content to render
-                page.wait_for_timeout(3000)
+                page.goto(show["url"], wait_until="domcontentloaded", timeout=30000)
+                page.wait_for_timeout(4000)  # Wait for JS player execution
+                
                 html_content = page.content()
-
                 soup = BeautifulSoup(html_content, "html.parser")
 
                 # Extract cover image
                 logo_tag = soup.find("meta", property="og:image")
                 show_logo = logo_tag["content"] if logo_tag and logo_tag.has_attr("content") else ""
 
-                # Find episode video IDs from rendered HTML
-                matches = re.findall(r'([a-f0-9]{24})', html_content)
+                # Extract video IDs (24 hex characters)
+                raw_ids = re.findall(r'([a-f0-9]{24})', html_content)
                 
-                # Deduplicate and clean IDs
+                # Deduplicate video IDs
                 video_ids = []
-                for vid in matches:
+                for vid in raw_ids:
                     if vid not in video_ids:
                         video_ids.append(vid)
 
-                print(f"[{show['name']}] Extracted {len(video_ids)} video IDs.")
+                limit = show.get("max_episodes", 20)
+                print(f"[{show['name']}] Processing top {min(len(video_ids), limit)} out of {len(video_ids)} extracted IDs.")
+
+                token_suffix = f"?wmsAuthSign={captured_auth_token[0]}" if captured_auth_token[0] else ""
 
                 count = 0
                 for vid in video_ids:
                     count += 1
-                    if count > 10:
+                    if count > limit:
                         break
 
                     ep_title = f"Episódio {count}"
-                    stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{vid}-L.smil/playlist.m3u8"
+                    stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{vid}-L.smil/playlist.m3u8{token_suffix}"
 
                     m3u_lines.append(
                         f'#EXTINF:-1 tvg-logo="{show_logo}" '
