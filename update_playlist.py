@@ -9,28 +9,24 @@ SHOWS_TO_SCRAPE = [
     {
         "name": "Dois às 10",
         "category": "Entretenimento",
-        "url": "https://tviplayer.iol.pt/programa/dois-as-10/5fdcb61a0cf2432ec4cb03e2"
+        "url": "https://tviplayer.iol.pt/programa/dois-as-10"
     },
     {
         "name": "Goucha",
         "category": "Entretenimento",
-        "url": "https://tviplayer.iol.pt/programa/goucha/5fe350a40cf2febe232a5ff5"
+        "url": "https://tviplayer.iol.pt/programa/goucha"
     }
 ]
 
 def fetch_global_token():
-    """Attempts to grab wmsAuthSign token from TVI's public Matrix API."""
     headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
     try:
         res = requests.get("https://services.iol.pt/matrix/init/tviplayer", headers=headers, timeout=10)
         if res.status_code == 200:
             data = res.json()
-            token = data.get("wmsAuthSign") or data.get("token") or ""
-            if token:
-                print("Token successfully retrieved from API!")
-                return token
+            return data.get("wmsAuthSign") or data.get("token") or ""
     except Exception as e:
-        print(f"Token retrieval note: {e}")
+        print(f"Token note: {e}")
     return ""
 
 def build_m3u():
@@ -50,40 +46,32 @@ def build_m3u():
 
             soup = BeautifulSoup(res.text, "html.parser")
 
-            # Extract logo/cover image from meta tags
             logo_tag = soup.find("meta", property="og:image")
             show_logo = logo_tag["content"] if logo_tag and logo_tag.has_attr("content") else ""
 
-            # Search for any links containing /video/ in href
-            video_links = soup.find_all("a", href=re.compile(r'/video/'))
+            # Extract episode links from href attributes
+            video_links = soup.find_all("a", href=re.compile(r'/video/|/episodio/'))
             
-            # Fallback: search raw HTML for video href patterns if BeautifulSoup tags missed any
-            if not video_links:
-                raw_hrefs = re.findall(r'href=["\']([^"\']*?/video/[^"\']+)["\']', res.text)
-                episodes_found = list(set(raw_hrefs))
-            else:
-                episodes_found = []
+            raw_hrefs = []
+            if video_links:
                 for a in video_links:
                     href = a.get("href", "")
                     title = a.text.strip()
-                    if href and href not in [e[0] for e in episodes_found]:
-                        episodes_found.append((href, title))
+                    if href:
+                        raw_hrefs.append((href, title))
+            else:
+                matches = re.findall(r'href=["\']([^"\']+)["\']', res.text)
+                raw_hrefs = [(m, "") for m in matches if '/video/' in m or '/episodio/' in m]
 
-            print(f"[{show['name']}] Found {len(episodes_found)} raw video links.")
+            print(f"[{show['name']}] Found {len(raw_hrefs)} potential episode links.")
 
             added_ids = set()
             count = 0
 
-            for ep in episodes_found:
-                href = ep[0] if isinstance(ep, tuple) else ep
-                title = ep[1] if isinstance(ep, tuple) and ep[1] else ""
-
-                # Extract 24-char hex ID for the video stream
-                video_match = re.search(r'video/([a-f0-9]{24})', href)
+            for href, title in raw_hrefs:
+                video_match = re.search(r'([a-f0-9]{24})', href)
                 if not video_match:
-                    video_match = re.search(r'([a-f0-9]{24})', href)
-                    if not video_match or video_match.group(1) in show["url"]:
-                        continue
+                    continue
 
                 video_id = video_match.group(1)
                 if video_id in added_ids:
@@ -91,7 +79,7 @@ def build_m3u():
 
                 added_ids.add(video_id)
                 count += 1
-                if count > 10:  # Limit to top 10 latest episodes
+                if count > 10:
                     break
 
                 ep_title = title if title else f"Episódio {count}"
