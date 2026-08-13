@@ -16,6 +16,11 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          # Fetch full history so git push works cleanly
+          fetch-depth: 0
+          # Ensure checkout uses the write token
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,13 +36,7 @@ jobs:
         run: python update_playlist.py
 
       - name: Commit and push updated playlist
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add portugal_tvi.m3u
-          if ! git diff --staged --quiet; then
-            git commit -m "Auto-update TVI playlist"
-            git push origin HEAD:${{ github.ref_name }}
-          else
-            echo "No changes to commit."
-          fi
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Auto-update TVI playlist
+          file_pattern: 'portugal_tvi.m3u'
