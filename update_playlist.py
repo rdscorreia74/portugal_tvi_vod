@@ -1,4 +1,5 @@
 import re
+import json
 import requests
 from bs4 import BeautifulSoup
 
@@ -18,44 +19,49 @@ SHOWS_TO_SCRAPE = [
     }
 ]
 
-def extract_token(text):
-    """Search for wmsAuthSign across URL parameters, JS variables, and JSON strings."""
-    patterns = [
-        r'wmsAuthSign=([^\s"\'&]+)',
-        r'["\']wmsAuthSign["\']\s*:\s*["\']([^"\'\s]+)["\']',
-        r'wmsAuthSign["\']?\s*=\s*["\']([^"\'\s]+)["\']'
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, text)
-        if match:
-            return match.group(1)
-    return None
-
 def fetch_global_token():
-    headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Referer": BASE_URL,
+        "Accept": "application/json, text/plain, */*"
+    }
     
-    # 1. Primary Method: TVI Direto player page (guaranteed to contain active wmsAuthSign token)
-    print("Fetching global token from TVI Direto...")
+    # Method 1: Fetch via TVI's Matrix token API endpoint
+    print("Trying TVI Auth API...")
     try:
-        res = requests.get(f"{BASE_URL}/direto", headers=headers, timeout=10)
-        if res.status_code == 200:
-            token = extract_token(res.text)
+        api_res = requests.get("https://services.iol.pt/matrix/init/tviplayer", headers=headers, timeout=10)
+        if api_res.status_code == 200:
+            data = api_res.json()
+            token = data.get("wmsAuthSign") or data.get("token")
             if token:
-                print("Successfully extracted token from Direto!")
+                print("Successfully obtained token from API!")
                 return token
     except Exception as e:
-        print(f"Error checking Direto page: {e}")
+        print(f"API attempt failed: {e}")
 
-    # 2. Fallback: Search show pages directly
+    # Method 2: Extract from page state (JSON blocks in HTML)
     for show in SHOWS_TO_SCRAPE:
-        print(f"Fallback searching: {show['name']}...")
+        print(f"Checking JSON state for: {show['name']}...")
         try:
-            res = requests.get(show["url"], headers=headers, timeout=10)
+            res = requests.get(show["url"], headers={"User-Agent": USER_AGENT, "Referer": BASE_URL}, timeout=10)
             if res.status_code == 200:
-                token = extract_token(res.text)
-                if token:
-                    print("Successfully extracted token!")
-                    return token
+                # Look for __NEXT_DATA__ or embedded JSON
+                soup = BeautifulSoup(res.text, "html.parser")
+                script = soup.find("script", id="__NEXT_DATA__")
+                if script and script.string:
+                    json_data = json.loads(script.string)
+                    # Deep search for wmsAuthSign string in JSON
+                    json_str = json.dumps(json_data)
+                    match = re.search(r'wmsAuthSign["\']?\s*:\s*["\']([^"\'\s]+)["\']', json_str)
+                    if match:
+                        print("Successfully extracted token from __NEXT_DATA__!")
+                        return match.group(1)
+
+                # Direct regex search on the raw page
+                match = re.search(r'wmsAuthSign=([^\s"\'&]+)', res.text)
+                if match:
+                    print("Successfully extracted token via regex!")
+                    return match.group(1)
         except Exception as e:
             print(f"Error checking {show['name']}: {e}")
 
@@ -64,9 +70,11 @@ def fetch_global_token():
 
 def build_m3u():
     token = fetch_global_token()
+    
+    # Fallback to empty token string if unavailable so playlist generates anyway
     if not token:
-        print("Aborting: missing token.")
-        return
+        print("Warning: Token missing, proceeding without token query param.")
+        token = ""
 
     m3u_lines = ["#EXTM3U\n"]
     headers = {"User-Agent": USER_AGENT, "Referer": BASE_URL}
@@ -79,24 +87,22 @@ def build_m3u():
             
         soup = BeautifulSoup(res.text, "html.parser")
         
-        # Extract show poster / logo
+        # Show poster / logo
         logo_tag = soup.find("meta", property="og:image")
         show_logo = logo_tag["content"] if logo_tag else ""
 
-        # Extract 24-character hexadecimal video IDs from any links or attributes
+        # Find 24-char hex IDs
         video_ids = list(set(re.findall(r'[a-f0-9]{24}', res.text)))
-        
-        # Filter out the show ID itself if present in URL
         show_id_match = re.search(r'[a-f0-9]{24}', show["url"])
         if show_id_match:
-            show_id = show_id_match.group(0)
-            video_ids = [v for v in video_ids if v != show_id]
+            video_ids = [v for v in video_ids if v != show_id_match.group(0)]
 
         print(f"Found {len(video_ids)} episode video IDs for {show['name']}")
 
-        for idx, video_id in enumerate(video_ids[:10]):  # Limit to 10 latest episodes per show
+        for idx, video_id in enumerate(video_ids[:10]):
             ep_title = f"Episódio {idx + 1}"
-            stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{video_id}-L.smil/playlist.m3u8?wmsAuthSign={token}"
+            auth_suffix = f"?wmsAuthSign={token}" if token else ""
+            stream_url = f"https://streaming-vod2.iol.pt/vod/smil:{video_id}-L.smil/playlist.m3u8{auth_suffix}"
             
             m3u_lines.append(
                 f'#EXTINF:-1 tvg-logo="{show_logo}" '
