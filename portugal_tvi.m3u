@@ -136,49 +136,49 @@ https://streaming-vod2.iol.pt/vod/smil:6825f4cbd34e3f0bae9e34a3-L.smil/playlist.
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabda230cf299bc2953c846-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aaa7ee20cf299bc2953c6c5-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" tvg-name="Dois às 10 - Episódio 24" group-logo="",Dois às 10 - Episódio 24
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd8ed0cf299bc2953c83f-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aaa7d480cf20dc52778c4fc-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" tvg-name="Dois às 10 - Episódio 25" group-logo="",Dois às 10 - Episódio 25
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aaa7ee20cf299bc2953c6c5-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad1fcc0cf20dc52778ca1a-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" tvg-name="Dois às 10 - Episódio 26" group-logo="",Dois às 10 - Episódio 26
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aaa7d480cf20dc52778c4fc-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad1e8d0cf23b0ed4fd8c94-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" tvg-name="Dois às 10 - Episódio 27" group-logo="",Dois às 10 - Episódio 27
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd50ed34e9a786e758574-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad2d8b0cf299bc2953cb69-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" tvg-name="Dois às 10 - Episódio 28" group-logo="",Dois às 10 - Episódio 28
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd4040cf22b9f8904be78-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad2c1d0cf299bc2953cb67-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" tvg-name="Dois às 10 - Episódio 29" group-logo="",Dois às 10 - Episódio 29
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd104d34e9a786e758569-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad4496d34e53c759c72b86-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Dois às 10" tvg-name="Dois às 10 - Episódio 30" group-logo="",Dois às 10 - Episódio 30
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabcf780cf20dc52778c6ad-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad3f020cf23b0ed4fd8cf5-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 1" group-logo="",Goucha - Episódio 1
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
@@ -316,46 +316,46 @@ https://streaming-vod2.iol.pt/vod/smil:6825f4cbd34e3f0bae9e34a3-L.smil/playlist.
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabda230cf299bc2953c846-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aaa7ee20cf299bc2953c6c5-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 24" group-logo="",Goucha - Episódio 24
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd8ed0cf299bc2953c83f-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aaa7d480cf20dc52778c4fc-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 25" group-logo="",Goucha - Episódio 25
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aaa7ee20cf299bc2953c6c5-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad1fcc0cf20dc52778ca1a-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 26" group-logo="",Goucha - Episódio 26
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aaa7d480cf20dc52778c4fc-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad1e8d0cf23b0ed4fd8c94-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 27" group-logo="",Goucha - Episódio 27
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd50ed34e9a786e758574-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad2d8b0cf299bc2953cb69-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 28" group-logo="",Goucha - Episódio 28
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd4040cf22b9f8904be78-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad2c1d0cf299bc2953cb67-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 29" group-logo="",Goucha - Episódio 29
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabd104d34e9a786e758569-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad4496d34e53c759c72b86-L.smil/playlist.m3u8
 #EXTINF:-1 tvg-logo="" group-title="Entretenimento - Goucha" tvg-name="Goucha - Episódio 30" group-logo="",Goucha - Episódio 30
 #KODIPROP:inputstream=inputstream.adaptive
 #KODIPROP:inputstream.adaptive.manifest_type=hls
 #KODIPROP:inputstream.adaptive.manifest_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
 #KODIPROP:inputstream.adaptive.stream_headers=User-Agent=Mozilla/5.0&Referer=https://tviplayer.iol.pt/&Origin=https://tviplayer.iol.pt
-https://streaming-vod2.iol.pt/vod/smil:6aabcf780cf20dc52778c6ad-L.smil/playlist.m3u8
+https://streaming-vod2.iol.pt/vod/smil:6aad3f020cf23b0ed4fd8cf5-L.smil/playlist.m3u8
